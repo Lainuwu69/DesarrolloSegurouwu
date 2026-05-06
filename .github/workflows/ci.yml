@@ -16,5 +16,11 @@ jobs:
       - name: Verificar que existe index.html
         run: test -f index.html
 
+      - name: Verificar estructura HTML básica
+        run: |
+          grep -q "<html>" index.html
+          grep -q "<body>" index.html
+          grep -q "</html>" index.html
+
       - name: Mostrar mensaje final
-        run: echo "El pipeline se ejecutó correctamente"
+        run: echo "El pipeline CI se ejecutó correctamente"
