@@ -22,5 +22,8 @@ jobs:
           grep -q "<body>" index.html
           grep -q "</html>" index.html
 
+      - name: Verificar titulo de la pagina
+        run: grep -q "<title>Desarrollo Seguro</title>" index.html
+
       - name: Mostrar mensaje final
         run: echo "El pipeline CI se ejecutó correctamente"
