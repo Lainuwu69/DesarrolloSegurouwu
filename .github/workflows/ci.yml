@@ -1,29 +1,32 @@
-name: Primer Pipeline CI
+name: CI Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  verificar-html:
+  test:
+    name: Tests + Analisis de Seguridad
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar código del repositorio
+      - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Verificar que existe index.html
-        run: test -f index.html
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-      - name: Verificar estructura HTML básica
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar tests
+        run: pytest tests/ -v
+
+      - name: Analisis de seguridad con Bandit
         run: |
-          grep -q "<html>" index.html
-          grep -q "<body>" index.html
-          grep -q "</html>" index.html
-
-      - name: Verificar titulo de la pagina
-        run: grep -q "<title>Desarrollo Seguro</title>" index.html
-
-      - name: Mostrar mensaje final
-        run: echo "El pipeline CI se ejecutó correctamente"
+          pip install bandit
+          bandit -r . -ll -ii --exclude ./tests,./venv
