@@ -7,7 +7,7 @@ app = Flask(__name__)
 def hello():
     return jsonify({
         "status": "ok",
-        "message": "Pipeline CI/CD funcionando correctamente",
+        "message": "Pipeline CI/CD funcionando desde una rama feature",
         "env": "dev"
     })
 
