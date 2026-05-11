@@ -30,3 +30,49 @@ jobs:
         run: |
           pip install bandit
           bandit -r . -ll -ii --exclude ./tests,./venv
+
+  deploy-dev:
+    name: Deploy a Desarrollo
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy a Dev en Render
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEV_HOOK }}"
+          echo "Deploy a Dev disparado"
+
+      - name: Esperar que Render inicie
+        run: sleep 60
+
+  smoke-test:
+    name: Smoke Test en Dev
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verificar que Dev responde
+        run: |
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://desarrollosegurouwu-dev.onrender.com/health)
+            if [ "$STATUS" -eq 200 ]; then
+              echo "Dev responde correctamente con HTTP $STATUS"
+              exit 0
+            fi
+            echo "Intento $i fallido con HTTP $STATUS. Reintentando..."
+            sleep 15
+          done
+          echo "Dev no responde despues de 5 intentos"
+          exit 1
+
+  deploy-prod:
+    name: Deploy a Produccion
+    needs: smoke-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy a Prod en Render
+        run: |
+          curl -X POST "${{ secrets.RENDER_PROD_HOOK }}"
+          echo "Deploy a Produccion disparado"
